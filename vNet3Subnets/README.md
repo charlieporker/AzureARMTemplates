@@ -1,6 +1,8 @@
 # Azure vNet with 3 subnets and NSG template
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/)
+<a href="https://azuredeploy.net/?repository=https://github.com/charlieporker/AzureARMTemplates/edit/master/vNet3Subnets/" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
 
 ## Table of Contents
 
