@@ -1,70 +1,163 @@
-# Azure vNet with 3 subnets and NSG template
-
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://azuredeploy.net/)
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Important Notes](#importantnotes)
-3. [Pre Deployment Steps](#predeployment)
-4. [Deployment](#deployment)
-5. [Post Deployment Steps](#postdeployment)
-6. [Teardown Deployment](#teardown)
-7. [References](#references)
-
-<a name="overview"></a>
-
-## Overview
-This template provisions an Azure VNET with 3 Subnets and NSG groups.
-
-<a name="importantnotes"></a>
-
-### Important Notes
-
-* Do not run this solution in a **production environment/subscription**.
-* It is recommended you use a clean Windows 10 (or similar) VM to perform the solution to ensure that the correct PowerShell modules get loaded.
-* Deployment takes around **40-45 minutes** to complete.
-
-<a name="predeployment"></a>
-
-### Pre Deployment Step
-
-Before proceeding to the deployment of the template, we need to perform the following steps.
-
-**Note:** You can perform these steps through the Azure portal as well.
-
-#### 1. Install the required Powershell modules
-
-* Install and configure the Azure PowerShell module
-
-    Follow the instructions in the article to [install the Azure PowerShell module and connect to your Azure subscription](https://docs.microsoft.com/powershell/azure/install-azurerm-ps?toc=%2fazure%2factive-directory-domain-services%2ftoc.json).
-
-#### 2. Connect To Azure 
-
-    # Connect to your Azure Account.
-    Add-AzureRmAccount
-
-<a name="deployment"></a>
-
-<p></p>
-
-**Note:** 
-* Deployment takes around 5 minutes
-
-<a name="postdeployment"></a>
-
-### Post Deployment Steps
-
-#### 1. Check vNet and Subnets in Azure Portal
-To check configuration status:
-Go to the Azure portal -> Select Network resource group -> Click vNet -> Review Subnets
-
-<a name="teardown"></a>
-
-### Teardown Deployment
-To remove this deployment simply remove the resource group that contains this sample. 
-    
-<a name="references"></a>
-
-### References
-1. Pre-requisites: https://docs.microsoft.com/en-us/azure/active-directory-domain-services/active-directory-ds-enable-using-powershell
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "vNETxx-BU-ENV-REGION",
+            "metadata": {
+                "description": "Name of Virtual Network: [Resource Type/vNETnn]-[Business Unit]-[Environment]-[Region]"
+            }
+        },
+        "addressPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.0.0/16",
+            "metadata": {
+                "description": "Address space of Virtual Network in CIDR format x.x.x.x/x"
+            }
+        },
+        "T1SubnetName": {
+            "type": "string",
+            "defaultValue": "External",
+            "metadata": {
+                "description": "Name of Tier 1 Subnet e.g. Web"
+            }
+        },
+        "T1SubnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.1.0/24",
+            "metadata": {
+                "description": "Address range of Tier 1 Subnet in CIDR format"
+            }
+        },
+        "T1NSGName": {
+            "type": "string",
+            "defaultValue": "NSG-BU-ENV-WEB-REG",
+            "metadata": {
+                "description": "Name of Tier 1 NSG: [Resource Type/NSG]-[Business Unit]-[Environment]-[SUBNET]-[REGION]"
+            }
+        },
+        "T2SubnetName": {
+            "type": "string",
+            "defaultValue": "Internal",
+            "metadata": {
+                "description": "Name of Tier 2 Subnet e.g. App"
+            }
+        },
+        "T2SubnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.2.0/24",
+            "metadata": {
+                "description": "Address range of Tier 2 Subnet in CIDR format"
+            }
+        },
+        "T2NSGName": {
+            "type": "string",
+            "defaultValue": "NSG-BU-ENV-APP-REG",
+            "metadata": {
+                "description": "Name of Tier 2 NSG: [Resource Type/NSG]-[Business Unit]-[Environment]-[SUBNET]-[REGION]"
+            }
+        },
+        "T3SubnetName": {
+            "type": "string",
+            "defaultValue": "Backend",
+            "metadata": {
+                "description": "Name of Tier 3 Subnet e.g. DBA"
+            }
+        },
+        "T3SubnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.0.3.0/24",
+            "metadata": {
+                "description": "Address range of Tier 3 Subnet in CIDR format"
+            }
+        },
+        "T3NSGName": {
+            "type": "string",
+            "defaultValue": "NSG-BU-ENV-DBA-REG",
+            "metadata": {
+                "description": "Name of Tier 3 NSG: [Resource Type/NSG]-[Business Unit]-[Environment]-[SUBNET]-[REGION]"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('T1NSGName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('T2NSGName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+            }
+        },
+        {
+            "apiVersion": "2017-10-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('T3NSGName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+            }
+        },
+        {
+            "name": "[parameters('virtualNetworkName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2017-10-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('T1NSGName'))]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('T2NSGName'))]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('T3NSGName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('T1SubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('T1SubnetPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('T1NSGName'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "[parameters('T2SubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('T2SubnetPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('T2NSGName'))]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "[parameters('T3SubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('T3SubnetPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('T3NSGName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
